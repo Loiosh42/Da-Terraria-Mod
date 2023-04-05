@@ -1,0 +1,46 @@
+﻿using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using System;
+using Microsoft.Xna.Framework;
+
+namespace P1test.Items.Over
+{
+	
+	public class FullAuto : ModItem
+	{
+		public override void SetStaticDefaults() {
+			Item.width = 26;
+			Item.height = 26;
+			DisplayName.SetDefault("Fully Automatic Device");
+			Tooltip.SetDefault("Free your hands, Free your soul.\n    Activates when you are hit");
+		}
+
+		public override void SetDefaults() {
+
+			Item.accessory = true; // Makes this item an accessory.
+			Item.rare = ItemRarityID.Blue; 
+			Item.value = Item.sellPrice(gold: 100); // Sets the item sell price to 100 gold coin.
+		}
+
+		public override void UpdateAccessory(Player p, bool hideVisual)
+		{
+
+			
+			hideVisual = true;
+			p.GetModPlayer<P1testPlayer>().MiniPort = true;
+			
+		}
+		public override void AddRecipes()
+		{
+			// because we don't call base.AddRecipes(), we erase the previously defined recipe and can now make a different one
+			Recipe recipe = new Recipe(Mod);
+			recipe.AddIngredient(ItemID.DirtBlock, 1);
+			
+			recipe.AddTile(TileID.WorkBenches);
+			recipe.SetResult(this);
+			recipe.Register();
+		}
+	
+	}
+}

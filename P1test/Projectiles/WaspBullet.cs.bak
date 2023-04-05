@@ -1,0 +1,118 @@
+using System;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Microsoft.Xna.Framework;
+
+namespace P1test.Projectiles
+{
+    public class WaspBullet : ModProjectile
+    {
+        public bool count = false;
+
+        public override void SetDefaults()
+        {
+            projectile.width = 8;//22
+            projectile.height = 6;//14
+            projectile.aiStyle = 0;
+            projectile.friendly = true;
+            projectile.hostile = false;
+            projectile.ranged = true;
+            projectile.timeLeft = 600;
+            projectile.alpha = 1;
+            projectile.light = 0.3f;
+            projectile.ignoreWater = true;
+            projectile.tileCollide = true;
+            aiType = 0;
+            projectile.penetrate = 20;
+        }
+        /*public override void PreDraw(SpriteBatch spriteBatch, Color lightColor) 
+        { 
+            
+            int num1 = Dust.NewDust(projectile.position, projectile.width, projectile.height, 15, projectile.velocity.X, projectile.velocity.Y, 100f, default(Color), 1f);
+
+            Main.dust[num1].noGravity = true;
+            Main.dust[num1].velocity *= 0.1f;
+
+        }*/
+
+        public override void ModifyHitPlayer(Player target, ref int damage, ref bool crit)
+        {
+            //target.AddBuff(mod.BuffType("VoidBurn"), 60);
+        }
+        public override void ModifyHitNPC(NPC target, ref int damage, ref float knockback, ref bool crit, ref int hitDirection)
+        {
+            //target.AddBuff(mod.BuffType("VoidBurn"), 60);
+        }
+
+
+        public override void Kill(int timeLeft)
+        {
+            
+            for (int i = 0; i < 25; i++)
+            {
+                int dustIndex = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 31, 0f, 0f, 100, default(Color), 0.7f);
+                Main.dust[dustIndex].velocity *= 0.2f;
+            }
+            // Fire Dust spawn
+            /*
+            for (int i = 0; i < 80; i++)
+            {
+                int dustIndex = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 6, 0f, 0f, 100, default(Color), 3f);
+                Main.dust[dustIndex].noGravity = true;
+                Main.dust[dustIndex].velocity *= 5f;
+                dustIndex = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 6, 0f, 0f, 100, default(Color), 2f);
+                Main.dust[dustIndex].velocity *= 3f;
+            }*/
+            Player player = Main.player[projectile.owner];
+
+            //Just showing off each parameter of NewProjectile function
+            float centerX = projectile.Center.X; //Spawn at the projectile's last center x when it gets destroyed
+            float centerY = projectile.Center.Y; //Spawn at the projectile's last center y when it gets destroyed
+            //float velocityX = 1f; //Doesn't move in the x direction
+            //float velocityY = 1f; //Doesn't move in the y direction
+
+
+            float velocityX = projectile.velocity.X;
+
+            float velocityY = projectile.velocity.Y;
+
+
+
+            int type = mod.ProjectileType("SingWasp"); //just the projectile you'll be firing
+            int damage = 75; //no damage
+            float knockBack = 0f; //no knockback
+
+            //Many ways of doing owner
+            int owner = Main.myPlayer;
+            owner = projectile.owner;
+            owner = player.whoAmI;
+
+            //Now let's put this all together, first is most simple
+            Projectile.NewProjectile(centerX, centerY, velocityX, velocityY, type, damage, knockBack, owner);
+            Projectile.NewProjectile(centerX, centerY, velocityX, velocityY, type, damage, knockBack, owner);
+
+        }
+
+
+       /*public override void ModifyDamageHitbox(ref Rectangle hitbox)
+        {
+            if(count == true)
+            {
+                hitbox.Inflate(500, 500); /////////////
+            }
+                
+        }*/
+        
+        
+        public override void AI()
+        {
+            projectile.rotation = (float)Math.Atan2((double)projectile.velocity.Y, (double)projectile.velocity.X) + 1.57f;
+
+
+        }
+       
+
+
+    }
+}

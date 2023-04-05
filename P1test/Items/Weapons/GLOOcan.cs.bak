@@ -1,0 +1,56 @@
+
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Graphics;
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+using Terraria;
+using Terraria.GameContent.Dyes;
+using Terraria.GameContent.UI;
+using Terraria.Graphics.Effects;
+using Terraria.Graphics.Shaders;
+using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
+using Terraria.UI;
+
+
+namespace P1test.Items.Weapons
+{
+	public class GLOOcan : ModItem
+	{
+		public override void SetStaticDefaults() {
+			DisplayName.SetDefault("GLOO canister");
+			Tooltip.SetDefault("Sticky!");
+		}
+
+		public override void SetDefaults() {
+			item.damage = 20;
+			item.ranged = true;
+			item.width = 14;
+			item.height = 17;
+			item.maxStack = 999;
+			item.consumable = true;             //You need to set the item consumable so that the ammo would automatically consumed
+			item.knockBack = 4f;
+			item.value = 10;
+			item.rare = ItemRarityID.Green;
+			item.shoot = ModContent.ProjectileType<Projectiles.GLOOballP>();   //The projectile shoot when your weapon using this ammo
+			item.shootSpeed = 2f;                  //The speed of the projectile
+			item.ammo = item.type;             //The ammo class this ammo belongs to.
+		}
+
+		
+
+		public override void AddRecipes() {
+			ModRecipe recipe = new ModRecipe(mod);
+			recipe.AddIngredient(ItemID.MusketBall, 50);
+			recipe.AddIngredient(ItemID.GraniteBlock, 1);
+			
+			recipe.SetResult(this, 50);
+			recipe.AddRecipe();
+		}
+	}
+}

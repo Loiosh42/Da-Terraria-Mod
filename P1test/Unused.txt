@@ -1,0 +1,183 @@
+using Terraria;
+using Terraria.ID;
+using Terraria.Utilities;
+using Terraria.ModLoader;
+using System;
+using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using Terraria.Graphics.Shaders;
+
+namespace P1test
+{
+	public class P1testRocketMethods 
+	{
+        public static void chaseEnemy(int projid, int projType)
+        {
+            //  Find projectile
+            bool found = false;
+            Projectile projectile = new Projectile();
+            int projectileIndex = 0;
+            foreach (Projectile p in Main.projectile)
+            {
+                if (p.type == projType && projid == p.identity)
+                {
+                    projectile = p;
+                    found = true;
+                    break;
+                }
+                projectileIndex++;
+            }
+            if (!found) return;
+
+
+            float velVector = (float)Math.Sqrt((double)(projectile.velocity.X * projectile.velocity.X + projectile.velocity.Y * projectile.velocity.Y));
+            float locAIzero = projectile.localAI[0];
+            if ((double)locAIzero == 0.0)
+            {
+                projectile.localAI[0] = velVector;
+                locAIzero = velVector;
+            }
+            if (projectile.alpha > 0)
+                projectile.alpha = projectile.alpha - 25;
+            if (projectile.alpha < 0)
+                projectile.alpha = 0;
+
+            float projX = (float)projectile.position.X;
+            float projY = (float)projectile.position.Y;
+            float maxDistance = 300f;
+            bool foundValidTarget = false;
+            int detectedTargetID = 0;
+            if ((double)projectile.ai[1] == 0.0)
+            {
+                for (int index = 0; index < 200; ++index)
+                {
+                    if (Main.npc[index].CanBeChasedBy((object)projectile, false) && ((double)projectile.ai[1] == 0.0 || (double)projectile.ai[1] == (double)(index + 1)))
+                    {
+                        float npcCenterX = (float)Main.npc[index].position.X + (float)(Main.npc[index].width / 2);
+                        float npcCenterY = (float)Main.npc[index].position.Y + (float)(Main.npc[index].height / 2);
+                        float npcProjDist = Math.Abs((float)projectile.position.X + (float)(projectile.width / 2) - npcCenterX) + Math.Abs((float)projectile.position.Y + (float)(projectile.height / 2) - npcCenterY);
+                        if ((double)npcProjDist < (double)maxDistance && Collision.CanHit(new Vector2((float)projectile.position.X + (float)(projectile.width / 2), (float)projectile.position.Y + (float)(projectile.height / 2)), 1, 1, Main.npc[index].position, Main.npc[index].width, Main.npc[index].height))
+                        {
+                            maxDistance = npcProjDist;
+                            projX = npcCenterX;
+                            projY = npcCenterY;
+                            foundValidTarget = true;
+                            detectedTargetID = index;
+                        }
+                    }
+                }
+                if (foundValidTarget)
+                    projectile.ai[1] = (float)(detectedTargetID + 1);
+                foundValidTarget = false;
+            }
+
+
+            if ((double)projectile.ai[1] > 0.0)
+            {
+                int index = (int)((double)projectile.ai[1] - 1.0);
+                if (Main.npc[index].active && Main.npc[index].CanBeChasedBy((object)projectile, true) && !Main.npc[index].dontTakeDamage)
+                {
+                    if ((double)Math.Abs((float)projectile.position.X + (float)(projectile.width / 2) - ((float)Main.npc[index].position.X + (float)(Main.npc[index].width / 2))) + (double)Math.Abs((float)projectile.position.Y + (float)(projectile.height / 2) - ((float)Main.npc[index].position.Y + (float)(Main.npc[index].height / 2))) < 1000.0)
+                    {
+                        foundValidTarget = true;
+                        projX = (float)Main.npc[index].position.X + (float)(Main.npc[index].width / 2);
+                        projY = (float)Main.npc[index].position.Y + (float)(Main.npc[index].height / 2);
+                    }
+                }
+                else
+                    projectile.ai[1] = 0.0f;
+            }
+            if (!projectile.friendly)
+                foundValidTarget = false;
+            if (foundValidTarget)
+            {
+                double projVelOrSomethingElse = (double)locAIzero;
+                Vector2 projCenter = new Vector2((float)(projectile.position.X + (double)projectile.width * 0.5), (float)(projectile.position.Y + (double)projectile.height * 0.5));
+                float distCenterX = projX - (float)projCenter.X;
+                float distCenterY = projY - (float)projCenter.Y;
+                double distCenter = Math.Sqrt((double)distCenterX * (double)distCenterX + (double)distCenterY * (double)distCenterY);
+                float num11 = (float)(projVelOrSomethingElse / distCenter);
+                float num12 = distCenterX * num11;
+                float num13 = distCenterY * num11;
+                int num14 = 8;
+                projectile.velocity.X = (float)((projectile.velocity.X * (double)(num14 - 1) + (double)num12) / (double)num14);
+                projectile.velocity.Y = (float)((projectile.velocity.Y * (double)(num14 - 1) + (double)num13) / (double)num14);
+            }
+            Main.projectile[projectileIndex] = projectile;
+        }
+
+        //  Spawns effects for rocket explosion, vanilla style
+        public static void explodeRocket(int projid, int projtype, Color color = default(Color), bool largeBlast = false, bool skipDamage = false)
+        {
+            //  Run only on the owner client 
+            //if (Main.myPlayer != owner) return;
+            bool found = false;
+            Projectile projectile = new Projectile();
+            foreach (Projectile p in Main.projectile)
+            {
+                if (p.type == projtype && projid == p.identity)
+                {
+                    projectile = p;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return;
+
+            projectile.position = projectile.position + new Vector2(projectile.width / 2, projectile.height / 2);
+            if (largeBlast)
+            {
+                projectile.width = 80;
+                projectile.height = 80;
+            }
+            else
+            {
+                projectile.width = 22;
+                projectile.height = 22;
+            }
+            int runSmoke, runFire;
+            if (largeBlast)
+            {
+                runSmoke = 70;
+                runFire = 40;
+            }
+            else
+            {
+                runSmoke = 30;
+                runFire = 20;
+            }
+            projectile.position = projectile.position - new Vector2(projectile.width / 2, projectile.height / 2);
+            for (int i = 0; i < runSmoke; i++)
+            {
+                int id = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.Smoke, Scale: 1.5f, newColor: color);
+                Main.dust[id].velocity *= 1.4f;
+            }
+            for (int i = 0; i < runFire; i++)
+            {
+                int id = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.Fire, Scale: 1.5f);
+                Main.dust[id].noGravity = true;
+                Main.dust[id].velocity *= 7f;
+                id = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.Fire, Scale: 1.5f);
+                Main.dust[id].velocity *= 3f;
+            }
+
+            
+            
+
+            /*if (skipDamage) return;
+            projectile.position = projectile.position + new Vector2(projectile.width / 2, projectile.height / 2);
+            if (largeBlast)
+            {
+                projectile.width = 200;
+                projectile.height = 200;
+            }
+            else
+            {
+                projectile.width = 128;
+                projectile.height = 128;
+            }*/
+            projectile.position = projectile.position - new Vector2(projectile.width / 2, projectile.height / 2);
+            projectile.Damage();
+        }
+    }
+}

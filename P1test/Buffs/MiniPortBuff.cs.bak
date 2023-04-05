@@ -1,0 +1,38 @@
+using Terraria.ID;
+using Terraria;
+using Terraria.ModLoader;
+
+namespace P1test.Buffs
+{
+	// Ethereal Flames is an example of a buff that causes constant loss of life.
+	// See ExamplePlayer.UpdateBadLifeRegen and ExampleGlobalNPC.UpdateLifeRegen for more information.
+	public class MiniPortBuff : ModBuff
+	{
+		public bool petProjectileNotSpawned = false;
+
+		public override void SetDefaults()
+		{
+			DisplayName.SetDefault("Finally Usefull");
+			Description.SetDefault("Only works on melee weapons");
+			Main.buffNoTimeDisplay[Type] = true;
+			Main.vanityPet[Type] = false;
+
+			//debuff = true;
+		}
+
+
+		public override void Update(Player player, ref int buffIndex)
+		{
+			player.buffTime[buffIndex] = 18000;
+			//player.GetModPlayer<ExamplePlayer>().examplePet = true;
+			bool petProjectileNotSpawned = player.ownedProjectileCounts[190] <= 0;
+			if (petProjectileNotSpawned && player.whoAmI == Main.myPlayer)
+			{
+				Projectile.NewProjectile(player.position.X + (float)(player.width / 2), player.position.Y + (float)(player.height / 2), 0f, 0f, 190, 0, 0f, player.whoAmI, 0f, 0f);
+			}
+
+		}
+	}
+}
+
+

@@ -1,0 +1,49 @@
+using System;
+using Microsoft.Xna.Framework;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria.DataStructures;
+
+
+namespace P1test.Items.Armor
+{
+	[AutoloadEquip(EquipType.Head)]
+	public class SuitArmorHat : ModItem
+	{
+		public override void SetStaticDefaults() {
+			DisplayName.SetDefault("Elegant Hat");
+			Tooltip.SetDefault("With complementary scarf.");
+		}
+
+		public override void SetDefaults() {
+			Item.width = 28;
+			Item.height = 24;
+			Item.value = 10000;
+			Item.rare = ItemRarityID.Green;
+			Item.defense = 30;
+		}
+
+
+		public override void UpdateArmorSet(Player player) {
+
+			player.boneArmor = true;
+			//player.accWatch = true;
+			player.breathMax = 800;
+			//player.discount = 0.2f;
+			player.fireWalk = true;
+			player.ignoreWater = true;
+			player.extraFall = 10;
+			player.maxFallSpeed += 2.0f;
+		}
+
+		public override void AddRecipes()
+		{
+			Recipe recipe = CreateRecipe();
+			recipe.AddIngredient(ItemID.DirtBlock, 10);
+			recipe.AddTile(TileID.WorkBenches);
+			recipe.Register();
+		}
+	}
+}

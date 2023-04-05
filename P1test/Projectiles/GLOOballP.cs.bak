@@ -1,0 +1,91 @@
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Graphics;
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+using Terraria;
+using Terraria.GameContent.Dyes;
+using Terraria.GameContent.UI;
+using Terraria.Graphics.Effects;
+using Terraria.Graphics.Shaders;
+using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
+using Terraria.UI;
+
+
+namespace P1test.Projectiles
+{ 
+	public class GLOOballP : ModProjectile
+	{
+
+
+		public override void SetStaticDefaults() {
+			DisplayName.SetDefault("Gloo Glob");     //The English name of the projectile
+			ProjectileID.Sets.TrailCacheLength[projectile.type] = 5;    //The length of old position to be recorded
+			ProjectileID.Sets.TrailingMode[projectile.type] = 0;        //The recording mode
+		}
+
+		public override void SetDefaults() {
+			projectile.width = 2;               //The width of projectile hitbox
+			projectile.height = 2;              //The height of projectile hitbox
+			projectile.aiStyle = 1;             //The ai style of the projectile, please reference the source code of Terraria
+			projectile.friendly = true;         //Can the projectile deal damage to enemies?
+			projectile.hostile = false;         //Can the projectile deal damage to the player?
+			projectile.ranged = true;           //Is the projectile shoot by a ranged weapon?
+			//projectile.penetrate = 2;           //How many monsters the projectile can penetrate. (OnTileCollide below also decrements penetrate for bounces as well)
+			projectile.timeLeft = 600;          //The live time for the projectile (60 = 1 second, so 600 is 10 seconds)
+			projectile.alpha = 1;             //The transparency of the projectile, 255 for completely transparent. (aiStyle 1 quickly fades the projectile in) Make sure to delete this if you aren't using an aiStyle that fades in. You'll wonder why your projectile is invisible.
+			projectile.light = 0f;            //How much light emit around the projectile
+			projectile.ignoreWater = true;          //Does the projectile's speed be influenced by water?
+			projectile.tileCollide = true;          //Can the projectile collide with tiles?
+			projectile.extraUpdates = 1;            //Set to above 0 if you want the projectile to update multiple time in a frame
+			aiType = 40;           //Act exactly like default Bullet
+		}
+
+		public override bool OnTileCollide(Vector2 oldVelocity) {
+			//If collide with tile, reduce the penetrate.
+			//So the projectile can reflect at most 5 times
+			projectile.Kill();
+			return false;
+		}
+
+		public override bool PreDraw(SpriteBatch spriteBatch, Color lightColor) {
+			//Redraw the projectile with the color not influenced by light
+			Vector2 drawOrigin = new Vector2(Main.projectileTexture[projectile.type].Width * 0.5f, projectile.height * 0.5f);
+			for (int k = 0; k < projectile.oldPos.Length; k++) {
+				Vector2 drawPos = projectile.oldPos[k] - Main.screenPosition + drawOrigin + new Vector2(0f, projectile.gfxOffY);
+				Color color = projectile.GetAlpha(lightColor) * ((float)(projectile.oldPos.Length - k) / (float)projectile.oldPos.Length);
+				spriteBatch.Draw(Main.projectileTexture[projectile.type], drawPos, null, color, projectile.rotation, drawOrigin, projectile.scale, SpriteEffects.None, 0f);
+			}
+			return true;
+		}
+
+		public override void OnHitNPC(NPC target, int damage, float knockback, bool crit)
+		{
+			
+			target.AddBuff(ModContent.BuffType<Buffs.GLOOed>(), 300, true);
+		}
+
+		
+
+
+		public override void AI()
+        {
+		
+		}
+
+		public override void Kill(int timeLeft)
+		{
+			int pX = (int)projectile.position.X;
+			int pY = (int)projectile.position.Y;
+			// This code and the similar code above in OnTileCollide spawn dust from the tiles collided with. SoundID.Item10 is the bounce sound you hear.
+			WorldGen.PlaceTile(pX / 16, pY / 16, ModContent.TileType<Tiles.GLOOtile>(), false, false, -1, 0);
+			Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
+			Main.PlaySound(SoundID.Item10, projectile.position);
+		}
+	}
+}
