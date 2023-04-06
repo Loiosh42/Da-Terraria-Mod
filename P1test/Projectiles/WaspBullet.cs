@@ -1,8 +1,15 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Terraria;
+using Terraria.DataStructures;
+using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
+using Terraria.ModLoader.IO;
 
 namespace P1test.Projectiles
 {
@@ -69,6 +76,10 @@ namespace P1test.Projectiles
             float centerY = Projectile.Center.Y; 
             float velocityX = Projectile.velocity.X;
             float velocityY = Projectile.velocity.Y;
+            /*float num = random.NextDouble(-2, 2);
+            float num1 = random.NextDouble(-3, 2);
+            float num2 = random.NextDouble(-4, 3);
+            float num3 = random.NextDouble(-4, 4);*/
 
             int type = Mod.Find<ModProjectile>("SingWasp").Type; 
             int damage = 75; 
@@ -80,7 +91,9 @@ namespace P1test.Projectiles
 
             Projectile.NewProjectile(Projectile.GetSource_FromThis(), centerX, centerY, velocityX, velocityY, type, damage, knockBack, owner);
             Projectile.NewProjectile(Projectile.GetSource_FromThis(), centerX, centerY, velocityX, velocityY, type, damage, knockBack, owner);
-
+            Projectile.NewProjectile(Projectile.GetSource_FromThis(), centerX, centerY, velocityX, velocityY, type, damage, knockBack, owner);
+            Projectile.NewProjectile(Projectile.GetSource_FromThis(), centerX, centerY, velocityX, velocityY, type, damage, knockBack, owner);
+            Projectile.NewProjectile(Projectile.GetSource_FromThis(), centerX, centerY, velocityX, velocityY, type, damage, knockBack, owner);
         }
 
 

@@ -37,9 +37,10 @@ namespace P1test
 		public float PlayerPos = 0f;
 		public bool Wasped = false;
 
-		public double ShHP = 300;
-		public int ShCooldown = 3001;
-		public bool SHLDon = false;
+		public double ShHP = 300; //Shield "health"
+		public int ShCooldown = 3001; //Cooldown
+		public bool SHLDon = false; //Activated when accesory equipped.
+		public bool SHLDon2 = false; //An additional check for shield on, mostly for debugging.
 
 		public override void ResetEffects()
 		{
@@ -65,6 +66,7 @@ namespace P1test
 			PlayerPos = 0f;
 			Wasped = false;
 			SHLDon = false;
+			SHLDon2 = false;
 
 		}
 
@@ -96,39 +98,40 @@ namespace P1test
 				newVelocity = newVelocity * 0.1f;
 				Player.velocity = newVelocity;
 			}
-			if (SHLDon = true)
-            {
-				if (ShCooldown < 3002)
-				{
-					ShCooldown = ShCooldown + 1;
-
-				}
-				else
-				{
-					if (ShHP < 300)
-					{
-						ShHP = ShHP + 1;
-					}
-				}
-			}
+			
 			
 		}
 
 		public override bool PreHurt(bool pvp, bool quiet, ref int damage, ref int hitDirection, ref bool crit, ref bool customDamage, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource, ref int cooldownCounter)
 		{
-			if (SHLDon = true)
+			int DONTCHANGTHISDAM = damage;
+			if (SHLDon == true)
             {
 				int TshDam = damage;
 				if (ShCooldown > 3000)
 				{
-					if (ShHP > 5)
+					if (SHLDon2 == true)
                     {
-						damage = TshDam / 2;
-						ShHP = ShHP - (TshDam / 2);
+						if (ShHP > 5)
+						{
+							damage = TshDam / 4;
+							ShHP = ShHP - (TshDam / 2);
+						}
+                        else
+                        {
+							ShCooldown = 1;
+							SHLDon2 = false;
+							damage = TshDam;
+						}
 					}
+					
 
 				}
-
+				
+			}
+            else
+            {
+				damage = DONTCHANGTHISDAM;
 			}
 			return true;
 		}
@@ -275,6 +278,24 @@ namespace P1test
 			Scarfe = false;
 			PlaySpeedX = Player.velocity.X;
 			PlaySpeedY = Player.velocity.Y;
+
+				if (ShCooldown <= 3000)
+				{
+					ShCooldown = ShCooldown + 10;
+					ShHP = 301; //needs changing so UI is not bugged
+					SHLDon2 = false;
+				}
+			
+				else
+				{
+					if (ShHP < 300)
+					{
+						ShHP = ShHP + 1;
+					}
+
+					SHLDon2 = true;
+				}
+			
 		}
 	}
 }
